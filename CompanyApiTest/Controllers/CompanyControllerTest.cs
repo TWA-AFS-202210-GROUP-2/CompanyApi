@@ -147,6 +147,29 @@ public class CompanyController
     }
 
     [Fact]
+    public async Task Should_change_employees_when_change_employees()
+    {
+        // given
+        var application = new WebApplicationFactory<Program>();
+        var httpClient = application.CreateClient();
+        await httpClient.DeleteAsync("/companies");
+        var company1 = await AddCompanyAsync("LB", httpClient);
+        var employee = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
+        var employee1 = new Employee("Bll", salary: 100);
+        var serializeObject = JsonConvert.SerializeObject(employee1);
+        var stringContent = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PutAsync($"companies/{company1.CompanyID}/employees/{employee.EmployeeID}", stringContent);
+        // when
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // then
+        var readAsStringAsync = await response.Content.ReadAsStringAsync();
+        var saved = JsonConvert.DeserializeObject<Employee>(readAsStringAsync);
+        Assert.Equal(employee1.Name, saved.Name);
+        Assert.Equal(employee1.Salary, saved.Salary);
+    }
+
+    [Fact]
     public async Task Should_return_add_employee_success_when_add_employee()
     {
         // given
@@ -205,6 +228,25 @@ public class CompanyController
         var saved = JsonConvert.DeserializeObject<List<Employee>>(readAsStringAsync);
         Assert.Equal(employee, saved[0]);
         Assert.Equal(employee2, saved[1]);
+    }
+
+    [Fact]
+    public async Task Should_delete_employee_success_delete_employee()
+    {
+        // given
+        var application = new WebApplicationFactory<Program>();
+        var httpClient = application.CreateClient();
+        await httpClient.DeleteAsync("/companies");
+        var company1 = await AddCompanyAsync("SB", httpClient);
+        var employee = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
+        var employee2 = await AddEmployeeAsync("Bel", 100, httpClient, company1);
+        var response = await httpClient.DeleteAsync($"companies/{company1.CompanyID}/employees/{employee.EmployeeID}");
+        // when
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // then
+        var readAsStringAsync = await response.Content.ReadAsStringAsync();
+        var saved = JsonConvert.DeserializeObject<List<Employee>>(readAsStringAsync);
+        Assert.Equal(employee, saved[0]);
     }
 
     private async Task<Company> AddCompanyAsync(string name, HttpClient httpClient)
