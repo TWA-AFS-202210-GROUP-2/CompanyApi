@@ -45,8 +45,8 @@ namespace CompanyApiTest.Controllers
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
             await httpClient.PostAsync("/companies", postBody);
             var company2 = new Company(name: "SLB");
-            var companyJson2 = JsonConvert.SerializeObject(company);
-            var postBody2 = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            var companyJson2 = JsonConvert.SerializeObject(company2);
+            var postBody2 = new StringContent(companyJson2, Encoding.UTF8, "application/json");
 
             //when
             var response = await httpClient.PostAsync("/companies", postBody2);
