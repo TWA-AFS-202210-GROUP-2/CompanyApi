@@ -136,13 +136,14 @@ public class CompanyController
         var company = new Company(name: "SLB");
         var serializeObject = JsonConvert.SerializeObject(company);
         var stringContent = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-        var response = await httpClient.PatchAsync($"companies/{company1.CompanyID}", stringContent);
+        var response = await httpClient.PutAsync($"companies/{company1.CompanyID}", stringContent);
         // when
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         // then
         var readAsStringAsync = await response.Content.ReadAsStringAsync();
-        var saved = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
-        Assert.Equal(company1, saved[0]);
+        var saved = JsonConvert.DeserializeObject<Company>(readAsStringAsync);
+        Assert.Equal(company.Name, saved.Name);
+        Assert.NotEmpty((System.Collections.IEnumerable)saved.CompanyID);
     }
 
     [Fact]
