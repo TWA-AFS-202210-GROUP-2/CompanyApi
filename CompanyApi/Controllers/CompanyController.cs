@@ -15,7 +15,7 @@ namespace CompanyApi.Controllers
         public static List<Company> companies = new List<Company>();
         public static List<Employee> employees = new List<Employee>();
         [HttpPost("companies")]
-        public ActionResult<Company> CreateCompany([FromBody]Company company)
+        public ActionResult<Company> CreateCompany([FromBody] Company company)
         {
             if (companies.Exists(item => item.Name == company.Name))
             {
@@ -30,14 +30,14 @@ namespace CompanyApi.Controllers
                 };
                 companies.Add(newCompany);
                 return new CreatedResult($"companies/{newCompany.Id}", newCompany);
-            }            
+            }
         }
 
         [HttpGet("companies")]
-        public ActionResult<List<Company>> GetCompanies([FromQuery]int? pageSize, [FromQuery]int? pageIndex)
+        public ActionResult<List<Company>> GetCompanies([FromQuery] int? pageSize, [FromQuery] int? pageIndex)
         {
             if (pageSize != null && pageIndex != null)
-            { 
+            {
                 return companies.GetRange((pageIndex.Value - 1) * pageSize.Value, pageSize.Value);
             }
 
@@ -95,7 +95,7 @@ namespace CompanyApi.Controllers
                 {
                     return BadRequest();
                 }
-                else 
+                else
                 {
                     var company = companies.Find(item => item.Id == id);
                     var newEmployee = new Employee
@@ -127,9 +127,9 @@ namespace CompanyApi.Controllers
                 else
                 {
                     var employeesWithSameCompany = from empl in employees
-                    from comp in companies
-                    where empl.CompanyId == comp.Id
-                    select empl;
+                                                   from comp in companies
+                                                   where empl.CompanyId == comp.Id
+                                                   select empl;
                     return employeesWithSameCompany.ToList();
                 }
             }
@@ -140,8 +140,8 @@ namespace CompanyApi.Controllers
         }
 
         [HttpPut("companies/{companyId}/employees/{employeeId}")]
-        public ActionResult<Employee> UpdateEmployeeById([FromRoute] string companyId, 
-            [FromRoute] string employeeId, 
+        public ActionResult<Employee> UpdateEmployeeById([FromRoute] string companyId,
+            [FromRoute] string employeeId,
             [FromBody] Employee employee)
         {
             if (companies.Exists(item => item.Id == companyId))
@@ -179,6 +179,21 @@ namespace CompanyApi.Controllers
                     employees.RemoveAll(item => item.Id == employeeId);
                     return Ok();
                 }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpDelete("companies/{companyId}")]
+        public ActionResult DeleteCompany([FromRoute] string companyId)
+        {
+            if (companies.Exists(item => item.Id == companyId))
+            {
+                employees.RemoveAll(item => item.CompanyId == companyId);
+                companies.RemoveAll(item => item.Id == companyId);
+                return Ok();
             }
             else
             {
