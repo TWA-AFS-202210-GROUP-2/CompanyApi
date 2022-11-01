@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,7 +46,7 @@ namespace CompanyApiTest.Controllers
             // given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
-            await httpClient.DeleteAsync("/companies/deleteAll");
+            await httpClient.DeleteAsync("/companies");
             var company = new Company(name: "SLB");
             var companyJson = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
@@ -56,6 +57,29 @@ namespace CompanyApiTest.Controllers
 
             // then
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_return_all_companies_successfully()
+        {
+            // given
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var company = new Company(name: "SLB");
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            var postResponse = await httpClient.PostAsync("/companies", postBody);
+            var responseBody = await postResponse.Content.ReadAsStringAsync();
+            var createCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+
+            // when
+            var response = await httpClient.GetAsync("/companies");
+
+            // then
+            var response_ = await response.Content.ReadAsStringAsync();
+            var getCompanies = JsonConvert.DeserializeObject<List<Company>>(response_);
+            Assert.Equal(createCompany, getCompanies[0]);
         }
     }
 }
