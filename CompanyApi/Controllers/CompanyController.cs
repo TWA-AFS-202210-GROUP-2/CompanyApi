@@ -48,6 +48,21 @@ namespace CompanyApi.Controllers
             return Ok(foundCompany);
         }
 
+        [HttpPut("{companyID}")]
+        //should return companies?
+        public ActionResult<List<Company>> UpdateCompany(Company company, [FromRoute] string companyID)
+        {
+            var foundCompany = companies.FirstOrDefault(company => company.CompanyID == companyID);
+            if (foundCompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            companies.Remove(foundCompany);
+            companies.Add(company);
+            return Ok(companies);
+        }
+
         [HttpDelete]
         public void DeleteAllCompanies()
         {

@@ -119,6 +119,28 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(company_two.Name, getCompanies[0].Name);
         }
 
+        [Fact]
+        public async void Should_return_update_companies_successfully()
+        {
+            // given
+            var httpClient = GetHttpClient();
+            await httpClient.DeleteAsync("/companies");
+            var company_one = new Company(name: "SLB");
+            var createResponse = await PostCompany(company_one, httpClient);
+            var createCompany = await DeserializeCompany(createResponse);
+            createCompany.Name = "TW";
+            var companyJson = JsonConvert.SerializeObject(createCompany);
+            var potBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+
+            // when
+            var response = await httpClient.PutAsync($"/companies/{createCompany.CompanyID}", potBody);
+
+            // then
+            var response_ = await response.Content.ReadAsStringAsync();
+            var updateCompanies = JsonConvert.DeserializeObject<List<Company>>(response_);
+            Assert.Equal(createCompany, updateCompanies[0]);
+        }
+
         private static HttpClient GetHttpClient()
         {
             var application = new WebApplicationFactory<Program>();
