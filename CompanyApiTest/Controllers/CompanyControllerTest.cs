@@ -11,7 +11,7 @@ using CompanyApi.Models;
 using Xunit;
 using System.Net;
 
-namespace PetApiTest.ControllerTest;
+namespace CompanyApiTest.ControllerTest;
 public class CompanyController
 {
     [Fact]
@@ -84,8 +84,8 @@ public class CompanyController
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         // then
         var readAsStringAsync = await response.Content.ReadAsStringAsync();
-        var saved = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
-        Assert.Equal(company1, saved[0]);
+        var saved = JsonConvert.DeserializeObject<Company>(readAsStringAsync);
+        Assert.Equal(company1, saved);
         }
 
     [Fact]
@@ -165,7 +165,7 @@ public class CompanyController
         // then
         Assert.Equal(employee.Name, saved.Name);
         Assert.Equal(employee.Salary, saved.Salary);
-        Assert.NotEmpty((System.Collections.IEnumerable)saved.CompanyID);
+        Assert.NotEmpty((System.Collections.IEnumerable)saved.EmployeeID);
     }
 
     [Fact]
@@ -175,16 +175,36 @@ public class CompanyController
         var application = new WebApplicationFactory<Program>();
         var httpClient = application.CreateClient();
         await httpClient.DeleteAsync("/companies");
-        var company1 = await AddCompanyAsync("SLB", httpClient);
+        var company1 = await AddCompanyAsync("LB", httpClient);
         var employee = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
-        var employee2 = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
-        var response = await httpClient.GetAsync($"companies?pageSize=1&pageIndex=1");
+        var employee2 = await AddEmployeeAsync("Bel", 100, httpClient, company1);
+        var response = await httpClient.GetAsync($"companies/{company1.CompanyID}/employees/{employee.EmployeeID}");
         // when
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // then
+        var readAsStringAsync = await response.Content.ReadAsStringAsync();
+        var saved = JsonConvert.DeserializeObject<Employee>(readAsStringAsync);
+        Assert.Equal(employee, saved);
+    }
+
+    [Fact]
+    public async Task Should_list_employee_success_when_list_employee()
+    {
+        // given
+        var application = new WebApplicationFactory<Program>();
+        var httpClient = application.CreateClient();
+        await httpClient.DeleteAsync("/companies");
+        var company1 = await AddCompanyAsync("SB", httpClient);
+        var employee = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
+        var employee2 = await AddEmployeeAsync("Bel", 100, httpClient, company1);
+        var response = await httpClient.GetAsync($"companies/{company1.CompanyID}/employees");
+        // when
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         // then
         var readAsStringAsync = await response.Content.ReadAsStringAsync();
         var saved = JsonConvert.DeserializeObject<List<Employee>>(readAsStringAsync);
         Assert.Equal(employee, saved[0]);
+        Assert.Equal(employee2, saved[1]);
     }
 
     private async Task<Company> AddCompanyAsync(string name, HttpClient httpClient)

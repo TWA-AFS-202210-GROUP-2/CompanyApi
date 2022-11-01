@@ -36,19 +36,25 @@ namespace CompanyApi.Controllers
                 return new ConflictResult();
             }
 
-            employee.CompanyID = Guid.NewGuid().ToString();
+            employee.EmployeeID = Guid.NewGuid().ToString();
             employees.Add(employee);
             return new CreatedResult($"/companies/{id}/employees/", employee);
         }
 
+        [HttpGet("{id}/employees")]
+        public ActionResult<List<Employee>> GetEmployes()
+        {            
+            return employees;
+        }
+
         [HttpGet]
-        public ActionResult<List<Company>> GetAll([FromQuery]int? pageSize, [FromQuery]int? pageIndex)
+        public ActionResult<List<Company>> GetAll([FromQuery] int? pageSize, [FromQuery] int? pageIndex)
         {
             if (pageSize == null && pageIndex != null)
             {
                 return companies.Skip((pageIndex.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
             }
-            
+
             return companies;
         }
 
@@ -56,6 +62,14 @@ namespace CompanyApi.Controllers
         public void DeleteAll()
         {
             companies.Clear();
+            employees.Clear();
+        }
+
+        [HttpDelete("{id}/employees/{eid}")]
+        public ActionResult<List<Employee>> DeleteEmployee(string id)
+        {
+            employees.RemoveAll(x => x.EmployeeID.Equals(id));
+            return employees;
         }
 
         [HttpDelete("{id}")]
@@ -71,12 +85,27 @@ namespace CompanyApi.Controllers
             return companies.First(x => x.CompanyID.Equals(id));
         }
 
+        [HttpGet("{id}/employees/{eid}")]
+        public ActionResult<Employee> GetEmployees(string eid)
+        {
+            return employees.First(x => x.EmployeeID.Equals(eid));
+        }
+
         [HttpPut("{id}")]
         public ActionResult<Company> PutCompany(string id, Company company)
         {
             var company1 = companies.First(x => x.CompanyID.Equals(id));
             company1.Name = company.Name;
             return company1;
+        }
+
+        [HttpPut("{id}/employees/{eid}")]
+        public ActionResult<Employee> PutEmployees(string id, Employee employee)
+        {
+            var employee1 = employees.First(x => x.EmployeeID.Equals(id));
+            employee.Name = employee1.Name;
+            employee.Salary = employee1.Salary;
+            return employee;
         }
     }
 }
