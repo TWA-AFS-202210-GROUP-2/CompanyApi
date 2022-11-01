@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,10 +18,10 @@ namespace CompanyApiTest
         {
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
+            _ = await httpClient.DeleteAsync("/api/companies");
             var company = new Company
             {
                 Name = "AAA",
-                Id = Guid.NewGuid().ToString(),
             };
             var serializeObject = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
@@ -32,6 +33,9 @@ namespace CompanyApiTest
             var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
             Assert.Equal(company.Id, saveCompany.Id);
             Assert.Equal(company.Name, saveCompany.Name);
+
+            var response2 = await httpClient.PostAsync("/api/companies", postBody);
+            Assert.Equal(HttpStatusCode.Conflict, response2.StatusCode);
         }
 
         [Fact]
@@ -54,12 +58,10 @@ namespace CompanyApiTest
             var company1 = new Company
             {
                 Name = "AAA",
-                Id = Guid.NewGuid().ToString(),
             };
             var company2 = new Company
             {
                 Name = "AAB",
-                Id = Guid.NewGuid().ToString(),
             };
             var companies = new List<Company>() { company1, company2 };
             var serializeObject1 = JsonConvert.SerializeObject(company1);
@@ -74,7 +76,11 @@ namespace CompanyApiTest
 
             var responseBody = await response.Content.ReadAsStringAsync();
             var saveCompanies = JsonConvert.DeserializeObject<List<Company>>(responseBody);
-            Assert.Equal(2, saveCompanies.Union(companies).Count());
+            var compareResult = from item in companies
+                            from item2 in saveCompanies
+                            where item.Name == item2.Name
+                            select item;
+            Assert.Equal(2, compareResult.Count());
         }
     }
 }
