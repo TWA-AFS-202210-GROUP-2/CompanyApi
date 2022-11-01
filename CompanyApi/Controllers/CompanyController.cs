@@ -63,6 +63,21 @@ namespace CompanyApi.Controllers
             return Ok(companies);
         }
 
+        [HttpPost("{companyID}/employees")]
+        //should return employee or company?
+        public ActionResult<Employee> CreateEmployee(Employee employee, [FromRoute] string companyID)
+        {
+            employee.EmployeeID = Guid.NewGuid().ToString();
+            var foundCompany = companies.FirstOrDefault(company => company.CompanyID == companyID);
+            if (foundCompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            foundCompany.Employees.Add(employee);
+            return Created($"/companies/{companyID}/employees", employee);
+        }
+
         [HttpDelete]
         public void DeleteAllCompanies()
         {

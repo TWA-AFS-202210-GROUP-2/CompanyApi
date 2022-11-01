@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Xml.Linq;
 
@@ -11,11 +12,13 @@ namespace CompanyApiTest.Controllers
         public Company(string name)
         {
             CompanyID = string.Empty;
+            Employees = new List<Employee>();
             Name = name;
         }
 
         public string Name { get; set; }
         public string CompanyID { get; set; }
+        public List<Employee> Employees { get; set; }
 
         public override bool Equals(object? obj)
         {

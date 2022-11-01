@@ -141,6 +141,27 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(createCompany, updateCompanies[0]);
         }
 
+        [Fact]
+        public async void Should_add_new_employee_successfully()
+        {
+            // given
+            var employee = new Employee(name: "xiaoming", salary: 2000);
+            var httpClient = GetHttpClient();
+            await httpClient.DeleteAsync("/companies");
+            var company = new Company(name: "SLB");
+            var createResponse = await PostCompany(company, httpClient);
+            var createCompany = await DeserializeCompany(createResponse);
+
+            // when
+            var response = await PostEmployee(createCompany.CompanyID, employee, httpClient);
+
+            // then
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Employee createEmployee = await DeserializeEmployee(response);
+            Assert.Equal("xiaoming", createEmployee.Name);
+            Assert.NotEmpty(createEmployee.EmployeeID);
+        }
+
         private static HttpClient GetHttpClient()
         {
             var application = new WebApplicationFactory<Program>();
@@ -161,6 +182,21 @@ namespace CompanyApiTest.Controllers
             var responseBody = await response.Content.ReadAsStringAsync();
             var createCompany = JsonConvert.DeserializeObject<Company>(responseBody);
             return createCompany;
+        }
+
+        private static async Task<HttpResponseMessage> PostEmployee(string companyID, Employee employee, HttpClient httpClient)
+        {
+            var employeeJson = JsonConvert.SerializeObject(employee);
+            var postBody = new StringContent(employeeJson, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync($"/companies/{companyID}/employees", postBody);
+            return response;
+        }
+
+        private static async Task<Employee> DeserializeEmployee(HttpResponseMessage response)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var createEmployee = JsonConvert.DeserializeObject<Employee>(responseBody);
+            return createEmployee;
         }
     }
 }
