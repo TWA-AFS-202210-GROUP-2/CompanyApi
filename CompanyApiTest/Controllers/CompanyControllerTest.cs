@@ -215,6 +215,32 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(employeeOne, updateEmployees[0]);
         }
 
+        [Fact]
+        public async void Should_return_empty_employees_of_company_successfully()
+        {
+            // given
+            var httpClient = GetHttpClient();
+            await httpClient.DeleteAsync("/companies");
+            var company = new Company(name: "SLB");
+            var createResponse = await PostCompany(company, httpClient);
+            var createCompany = await DeserializeCompany(createResponse);
+            var employeeOne = new Employee(name: "xiaoming", salary: 2000);
+            var createResponseOne = await PostEmployee(createCompany.CompanyID, employeeOne, httpClient);
+            var createEmployeeOne = await DeserializeEmployee(createResponseOne);
+            var employeeTwo = new Employee(name: "xiaohong", salary: 3000);
+            var createResponseTwo = await PostEmployee(createCompany.CompanyID, employeeTwo, httpClient);
+            var createEmployeeTwo = await DeserializeEmployee(createResponseTwo);
+
+            // when
+            await httpClient.DeleteAsync($"/companies/{createCompany.CompanyID}/employees/{createEmployeeOne.EmployeeID}");
+            var response = await httpClient.GetAsync($"/companies/{createCompany.CompanyID}/employees");
+
+            // then
+            var response_ = await response.Content.ReadAsStringAsync();
+            var updateEmployees = JsonConvert.DeserializeObject<List<Employee>>(response_);
+            Assert.Equal(createEmployeeTwo, updateEmployees[0]);
+        }
+
         private static HttpClient GetHttpClient()
         {
             var application = new WebApplicationFactory<Program>();

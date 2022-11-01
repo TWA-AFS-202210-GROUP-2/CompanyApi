@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace CompanyApi.Controllers
@@ -108,6 +109,25 @@ namespace CompanyApi.Controllers
             foundCompany.Employees.Remove(foundEmployee);
             foundCompany.Employees.Add(employee);
             return Ok(foundCompany.Employees);
+        }
+
+        [HttpDelete("{companyID}/employees/{employeeID}")]
+        public ActionResult DeleteEmployeeByID([FromRoute] string companyID, [FromRoute] string employeeID)
+        {
+            var foundCompany = companies.FirstOrDefault(company => company.CompanyID == companyID);
+            if (foundCompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            var foundEmployee = foundCompany.Employees.FirstOrDefault(employee => employee.EmployeeID == employeeID);
+            if (foundEmployee == null)
+            {
+                return new NotFoundResult();
+            }
+
+            foundCompany.Employees.Remove(foundEmployee);
+            return NoContent();
         }
 
         [HttpDelete]
