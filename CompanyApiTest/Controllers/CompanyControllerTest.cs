@@ -26,7 +26,7 @@ namespace CompanyApiTest.Controllers
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
 
             // when
-            var response = await httpClient.PostAsync("/companies", postBody);
+            var response = await httpClient.PostAsync("api/companies", postBody);
             // then
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
@@ -42,18 +42,56 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
-            httpClient.DeleteAsync("/api");
-
             var company = new Company(name: "slb");
-            var companyJson = JsonConvert.SerializeObject(company);
-            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            var postBody = SetupPostBody(company);
 
             // when
-            var response = await httpClient.PostAsync("/api/AddNewCompany", postBody);
+            var response = await httpClient.PostAsync("/api/companies", postBody);
+            var responseTwo = await httpClient.PostAsync("/api/companies", postBody);
             // then
-            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, responseTwo.StatusCode);
         }
 
+        [Fact]
+        public async void Should_return_all_companies_successfully()
+        {
+            //given
+            var httpClient = SetUpHttpClients();
+
+            PostNewCompany(httpClient, new Company(name: "slb"));
+            PostNewCompany(httpClient, new Company(name: "Schlumberger"));
+            // when
+            var response = await httpClient.GetAsync("/api/companies");
+            // then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_return_an_existing_company_successfully()
+        {
+            //given
+            var httpClient = SetUpHttpClients();
+
+            var createdCompany = await PostNewCompany(httpClient, new Company(name: "slb"));
+            PostNewCompany(httpClient, new Company(name: "Schlumberger"));
+            PostNewCompany(httpClient, new Company(name: "thoughtworks"));
+
+            //when
+            var response = await httpClient.GetAsync($"/api/companies/{createdCompany.CompanyID}");
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var company = JsonConvert.DeserializeObject<Company>(responseBody);
+            //then
+            Assert.Equal("slb", company.Name);
+        }
+
+        public async Task<Company> PostNewCompany(HttpClient httpClient, Company company)
+        {
+            var postBody = SetupPostBody(company);
+            var response = await httpClient.PostAsync("/api/companies", postBody);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var createdCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+            return createdCompany;
+        }
 
         public HttpClient SetUpHttpClients()
         {

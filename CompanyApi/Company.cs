@@ -5,7 +5,7 @@ namespace CompanyApi
 {
     public class Company
     {
-        public Company(string name)
+        public Company(string? name)
         {
             CompanyID = string.Empty;
             Name = name;
