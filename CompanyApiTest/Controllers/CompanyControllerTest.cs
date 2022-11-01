@@ -102,18 +102,55 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = await HttpClientInit();
-            var company = new Company("SLB");
-            var exp = await PostOne(company, httpClient);
-            var expstr = await exp.Content.ReadAsStringAsync();
-            var expobj = JsonConvert.DeserializeObject<Company>(expstr);
+            
+            await PostOne(new Company("1"), httpClient);
+            await PostOne(new Company("2"), httpClient);
+            await PostOne(new Company("3"), httpClient);
+            await PostOne(new Company("4"), httpClient);
+
+
             //when
-            var res = await httpClient.GetAsync($"/api/companies/{expobj._guid}");
+            var res = await httpClient.GetAsync($"/api/companies?index=2&pagesize=2");
+
+            //then
+            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+            var readAsStringAsync = await res.Content.ReadAsStringAsync();
+            var deserializeObject = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
+            Assert.Equal(2, deserializeObject.Count);
+            Assert.Equal("3", deserializeObject.First().Name);
+            Assert.Equal("4", deserializeObject.Last().Name);
+        }
+        [Fact]
+        public async Task Should_modify_company_name()
+        {
+            //given
+            var httpClient = await HttpClientInit();
+            var c = new Company("Schlumberger");
+            var expobj = await PostOneAndGetObj(c, httpClient);
+            c.Name = "SLB";
+            //when
+            var res = await httpClient.PutAsync($"/api/companies/{expobj._guid}", ConvertObj(c));
 
             //then
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
             var readAsStringAsync = await res.Content.ReadAsStringAsync();
             var deserializeObject = JsonConvert.DeserializeObject<Company>(readAsStringAsync);
-            Assert.Equal(company.Name, deserializeObject.Name);
+            Assert.Equal(c.Name, deserializeObject.Name);
+        }
+
+        private static StringContent ConvertObj(Company c)
+        {
+            var companyString = JsonConvert.SerializeObject(c);
+            var stringContent = new StringContent(companyString, Encoding.UTF8, "application/json");
+            return stringContent;
+        }
+
+        private static async Task<Company> PostOneAndGetObj(Company c, HttpClient httpClient)
+        {
+            var exp = await PostOne(c, httpClient);
+            var expstr = await exp.Content.ReadAsStringAsync();
+            var expobj = JsonConvert.DeserializeObject<Company>(expstr);
+            return expobj;
         }
 
         private static async Task<HttpResponseMessage> PostOne(Company company, HttpClient httpClient)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using CompanyApi.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -31,9 +32,15 @@ namespace CompanyApi.Controllers
         }
 
         [HttpGet("companies")]
-        public ActionResult<List<Company>> GetAll()
+        public ActionResult<List<Company>> GetAll([FromQuery] int? index, [FromQuery] int? pagesize)
         {
-            Console.WriteLine(companies.Count.ToString());
+            if (index != null && pagesize != null)
+            {
+                int? start = (index - 1) * pagesize;
+                int? end = index * pagesize;
+                return Ok(companies.Where((item, index) => index >= start && index <= end).ToList());
+            }
+
             return Ok(companies);
         }
 
@@ -42,10 +49,11 @@ namespace CompanyApi.Controllers
         {
             return Ok(companies.Find(item => item._guid.Equals(_guid)));
         }
-        [HttpGet("companies")]
-        public ActionResult<Company> GetByIndexAndPageSize([FromQuery] int index, [FromQuery] int pagesize)
+        [HttpPut("companies/{_guid}")]
+        public ActionResult<Company> GetById([FromRoute] string _guid)
         {
             return Ok(companies.Find(item => item._guid.Equals(_guid)));
         }
+
     }
 }
