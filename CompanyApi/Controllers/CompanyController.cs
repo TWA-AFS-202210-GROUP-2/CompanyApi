@@ -13,7 +13,7 @@ namespace CompanyApi.Controllers
     public class CompanyController : ControllerBase
     {
         public static List<Company> companies = new List<Company>();
-        public static List<Company> employees = new List<Company>();
+        public static List<Employee> employees = new List<Employee>();
         [HttpPost("companies")]
         public ActionResult<Company> CreateCompany([FromBody]Company company)
         {
@@ -64,6 +64,13 @@ namespace CompanyApi.Controllers
             return NoContent();
         }
 
+        [HttpDelete("employees")]
+        public IActionResult DeleteAllEmployees()
+        {
+            employees.Clear();
+            return NoContent();
+        }
+
         [HttpPatch("companies/{id}")]
         public ActionResult<Company> UpdateCompany([FromBody] Company newCompany)
         {
@@ -72,6 +79,35 @@ namespace CompanyApi.Controllers
                 var campany = companies.Find(item => item.Id == newCompany.Id);
                 campany.Name = newCompany.Name;
                 return campany;
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost("companies/{id}/employees")]
+        public ActionResult<Employee> CreateEmployee([FromBody] Employee employee, [FromRoute] string id)
+        {
+            if (companies.Exists(item => item.Id == id))
+            {
+                if (employees.Exists(item => item.Name == employee.Name))
+                {
+                    return BadRequest();
+                }
+                else 
+                {
+                    var company = companies.Find(item => item.Id == id);
+                    var newEmployee = new Employee
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = employee.Name,
+                        CompanyId = company.Id,
+                    };
+                    employees.Add(newEmployee);
+                    company.EmplyeeId.Add(newEmployee.Id);
+                    return new CreatedResult($"companies/{company.Id}/employees/{newEmployee.Id}", newEmployee);
+                }
             }
             else
             {

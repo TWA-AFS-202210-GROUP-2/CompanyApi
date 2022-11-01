@@ -182,7 +182,7 @@ namespace CompanyApiTest
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
             _ = await httpClient.DeleteAsync("/api/companies");
-
+            _ = await httpClient.DeleteAsync("/api/employees");
             // given
             var company = new Company
             {
@@ -194,21 +194,19 @@ namespace CompanyApiTest
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
             var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
-            saveCompany.Name = "BBB";
-            var serializeObjectPatch = JsonConvert.SerializeObject(saveCompany);
-            var patchBody = new StringContent(serializeObjectPatch, Encoding.UTF8, "application/json");
-            // when
-            var responsePatch = await httpClient.PatchAsync($"/api/companies/{saveCompany.Id}", patchBody);
-            responsePatch.EnsureSuccessStatusCode();
-            var responsePatchBody = await responsePatch.Content.ReadAsStringAsync();
-            var patchedCompany = JsonConvert.DeserializeObject<Company>(responsePatchBody);
+            var employee = new Employee
+            {
+                Name = "aaa",
+                Salary = 122,
+            };
+            var serializeEmployee = JsonConvert.SerializeObject(employee);
+            var postEmployeeBody = new StringContent(serializeEmployee, Encoding.UTF8, "application/json");
+            var responseEmployee = await httpClient.PostAsync($"/api/companies/{saveCompany.Id}/employees", postEmployeeBody);
+            responseEmployee.EnsureSuccessStatusCode();
+            var responseBodyEmployee = await responseEmployee.Content.ReadAsStringAsync();
+            var employeeNew = JsonConvert.DeserializeObject<Employee>(responseBodyEmployee);
 
-            // then
-            var responseGet = await httpClient.GetAsync($"/api/companies/{saveCompany.Id}");
-            responseGet.EnsureSuccessStatusCode();
-            var responseGethBody = await responseGet.Content.ReadAsStringAsync();
-            var responseGetCompany = JsonConvert.DeserializeObject<Company>(responsePatchBody);
-            Assert.Equal(responseGetCompany.Name, "BBB");
+            Assert.Equal(employeeNew.CompanyId, saveCompany.Id);
         }
     }
 }
