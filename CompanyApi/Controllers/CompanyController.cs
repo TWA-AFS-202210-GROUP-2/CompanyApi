@@ -56,11 +56,13 @@ namespace CompanyApi.Controllers
             companies.Find(item => item._guid.Equals(_guid)).Name = c.Name;
             return Ok(companies.Find(item => item.Name.Equals(c.Name)));
         }
+
         [HttpPost("companies/{_guid}/employees")]
-        public ActionResult<Company> AddNewEmployee([FromRoute] string _guid, Company c)
+        public ActionResult<Employee> AddNewEmployee([FromRoute] string _guid, Employee c)
         {
-            companies.Find(item => item._guid.Equals(_guid)).Name = c.Name;
-            return Ok(companies.Find(item => item.Name.Equals(c.Name)));
+            var employee = new Employee(name: c.Name, salary: c.Salary);
+            companies.Find(item => item._guid.Equals(_guid)).employees.Add(employee);
+            return Ok(employee);
         }
 
     }
