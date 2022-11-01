@@ -171,6 +171,59 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(3, deserializeObject.Count);
         }
 
+        [Fact]
+        public async Task Should_update_a_employee_of_a_company()
+        {
+            //given
+            var httpClient = await HttpClientInit();
+            var company = await PostOneCompanyAndGetReturnCompany(new Company("SLB"), httpClient);
+            Employee lwr = await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lwr", 1));
+            await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lj", 1));
+            await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("wzy", 1));
+            lwr.Name = "liwenrui";
+            //when
+            var res = await httpClient.PutAsync($"/api/companies/{company._guid}/employees",ConvertObjEmployeeToRequestBody(lwr));
+            var readAsStringAsync = await res.Content.ReadAsStringAsync();
+            var deserializeObject = JsonConvert.DeserializeObject<Employee>(readAsStringAsync);
+            Assert.Equal(lwr.Name, deserializeObject.Name);
+        }
+
+
+        [Fact]
+        public async Task Should_delete_a_employee_of_a_company()
+        {
+            //given
+            var httpClient = await HttpClientInit();
+            var company = await PostOneCompanyAndGetReturnCompany(new Company("SLB"), httpClient);
+            Employee lwr = await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lwr", 1));
+            await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lj", 1));
+            await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("wzy", 1));
+            
+            //when
+            var res = await httpClient.DeleteAsync($"/api/companies/{company._guid}/employees/{lwr.EmployeeId}");
+            var readAsStringAsync = await res.Content.ReadAsStringAsync();
+            var deserializeObject = JsonConvert.DeserializeObject<List<Employee>>(readAsStringAsync);
+            Assert.False(deserializeObject.Contains(lwr));
+        }
+
+        [Fact]
+        public async Task Should_delete_a_company()
+        {
+            //given
+            var httpClient = await HttpClientInit();
+            var company = await PostOneCompanyAndGetReturnCompany(new Company("SLB"), httpClient);
+            var company2 = await PostOneCompanyAndGetReturnCompany(new Company("SLBB"), httpClient);
+            Employee lwr = await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lwr", 1));
+            await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lj", 1));
+            await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("wzy", 1));
+
+            //when
+            var res = await httpClient.DeleteAsync($"/api/companies/{company._guid}");
+            var readAsStringAsync = await res.Content.ReadAsStringAsync();
+            var deserializeObject = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
+            Assert.Equal(1,deserializeObject.Count);
+        }
+
         private static async Task<Employee> PostOneEmployeeAndGetReturnEmployee(HttpClient httpClient, Company company, Employee employee)
         {
             var res = await httpClient.PostAsync($"/api/companies/{company._guid}/employees",

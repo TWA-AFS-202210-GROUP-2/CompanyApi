@@ -13,7 +13,6 @@ public class Employee
 
     public string EmployeeId { get; set; }
 
-    public string Name { get; }
-    public int Salary { get; }
-
+    public string Name { get; set; }
+    public int Salary { get; set; }
 }
