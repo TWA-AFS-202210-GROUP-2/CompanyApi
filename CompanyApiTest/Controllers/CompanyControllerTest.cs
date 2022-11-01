@@ -126,6 +126,26 @@ public class CompanyController
     }
 
     [Fact]
+    public async Task Should_change_companies_when_change_companies()
+    {
+        // given
+        var application = new WebApplicationFactory<Program>();
+        var httpClient = application.CreateClient();
+        await httpClient.DeleteAsync("/companies");
+        var company1 = await AddCompanyAsync("SLB", httpClient);
+        var company = new Company(name: "SLB");
+        var serializeObject = JsonConvert.SerializeObject(company);
+        var stringContent = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+        var response = await httpClient.PatchAsync($"companies/{company1.CompanyID}", stringContent);
+        // when
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // then
+        var readAsStringAsync = await response.Content.ReadAsStringAsync();
+        var saved = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
+        Assert.Equal(company1, saved[0]);
+    }
+
+    [Fact]
     public async Task Should_return_add_employee_success_when_add_employee()
     {
         // given
@@ -145,6 +165,25 @@ public class CompanyController
         Assert.Equal(employee.Name, saved.Name);
         Assert.Equal(employee.Salary, saved.Salary);
         Assert.NotEmpty((System.Collections.IEnumerable)saved.CompanyID);
+    }
+
+    [Fact]
+    public async Task Should_return_employee_success_when_search_employee()
+    {
+        // given
+        var application = new WebApplicationFactory<Program>();
+        var httpClient = application.CreateClient();
+        await httpClient.DeleteAsync("/companies");
+        var company1 = await AddCompanyAsync("SLB", httpClient);
+        var employee = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
+        var employee2 = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
+        var response = await httpClient.GetAsync($"companies?pageSize=1&pageIndex=1");
+        // when
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        // then
+        var readAsStringAsync = await response.Content.ReadAsStringAsync();
+        var saved = JsonConvert.DeserializeObject<List<Employee>>(readAsStringAsync);
+        Assert.Equal(employee, saved[0]);
     }
 
     private async Task<Company> AddCompanyAsync(string name, HttpClient httpClient)

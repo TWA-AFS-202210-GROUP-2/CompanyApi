@@ -27,7 +27,7 @@ namespace CompanyApi.Controllers
             return new CreatedResult($"/companies/{company.CompanyID}", company);
         }
 
-        [HttpPost("{id}")]
+        [HttpPost("{id}/employees")]
         public ActionResult<Employee> AddNewEmployee(Employee employee, string id)
         {
             var exist = employees.Exists(x => x.Name.Equals(employee.Name));
@@ -66,9 +66,17 @@ namespace CompanyApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<List<Company>> GetCompany(string id)
+        public ActionResult<Company> GetCompany(string id)
         {
-            return companies.FindAll(x => x.CompanyID.Equals(id));
+            return companies.First(x => x.CompanyID.Equals(id));
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult<Company> PutCompany(string id, Company company)
+        {
+            var company1 = companies.First(x => x.CompanyID.Equals(id));
+            company1.Name = company.Name;
+            return company1;
         }
     }
 }
