@@ -64,6 +64,13 @@ namespace CompanyApi.Controllers
             companies.Find(item => item._guid.Equals(_guid)).employees.Add(employee);
             return Ok(employee);
         }
+        [HttpGet("companies/{_guid}/employees")]
+        public ActionResult<List<Employee>> GetEmployees([FromRoute] string _guid)
+        {
+            Company company = companies.Find(item => item._guid.Equals(_guid));
+            
+            return Ok(company.employees);
+        }
 
     }
 }
