@@ -83,6 +83,31 @@ namespace CompanyApiTest.Controllers
         }
 
         [Fact]
+        public async void Should_return_company_by_companyID_successfully()
+        {
+            // given
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var company_one = new Company(name: "SLB");
+            var company_tow = new Company(name: "TW");
+            await PostCompany(company_one);
+            var companyJson = JsonConvert.SerializeObject(company_tow);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            var postResponse = await httpClient.PostAsync("/companies", postBody);
+            var response_ = await postResponse.Content.ReadAsStringAsync();
+            var postResult = JsonConvert.DeserializeObject<Company>(response_);
+
+            // when
+            var response = await httpClient.GetAsync($"/companies/{postResult.CompanyID}");
+
+            // then
+            var responseFromGet = await response.Content.ReadAsStringAsync();
+            var getCompany = JsonConvert.DeserializeObject<Company>(responseFromGet);
+            Assert.Equal(postResult.Name, getCompany.Name);
+        }
+
+        [Fact]
         public async void Should_return_page_range_companies_successfully()
         {
             // given
