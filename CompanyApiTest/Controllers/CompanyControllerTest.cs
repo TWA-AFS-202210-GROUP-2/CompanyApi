@@ -38,13 +38,22 @@ namespace CompanyApiTest.Controllers
         }
 
         [Fact]
-        public void Should_return_all_companies_successfully()
+        public async void Should_return_confict_message_successfully()
         {
             //given
             var httpClient = SetUpHttpClients();
-            //when
-            //then
+            httpClient.DeleteAsync("/api");
+
+            var company = new Company(name: "slb");
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+
+            // when
+            var response = await httpClient.PostAsync("/api/AddNewCompany", postBody);
+            // then
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
+
 
         public HttpClient SetUpHttpClients()
         {

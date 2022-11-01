@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.CookiePolicy;
+using System;
 
 namespace CompanyApi
 {
