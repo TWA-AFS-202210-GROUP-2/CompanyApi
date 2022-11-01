@@ -262,6 +262,31 @@ namespace CompanyApiTest
             Assert.Equal(responsePutEmployee.Name, employee2.Name);
         }
 
+        [Fact]
+        public async Task Should_delete_employee_when_delete_given_companyId_employeeId_successfullyAsync()
+        {
+            // init
+            HttpClient httpClient = await CleanMemory();
+            // given
+            var company = new Company
+            {
+                Name = "AAA",
+            };
+            Company saveCompany = await CreateACompany(httpClient, company);
+            var employee = new Employee
+            {
+                Name = "aaa",
+                Salary = 122,
+            };
+
+            Employee employeeNew = await CreateEmployee(httpClient, saveCompany, employee);
+            _ = await httpClient.DeleteAsync($"/api/companies/{saveCompany.Id}/employees/{employeeNew.Id}");
+
+            var responseGet = await httpClient.GetAsync($"/api/companies/{saveCompany.Id}/employees");
+
+            Assert.Equal(HttpStatusCode.BadRequest, responseGet.StatusCode);
+        }
+
         private static async Task<Employee> CreateEmployee(HttpClient httpClient, Company saveCompany, Employee employee)
         {
             var serializeEmployee = JsonConvert.SerializeObject(employee);
