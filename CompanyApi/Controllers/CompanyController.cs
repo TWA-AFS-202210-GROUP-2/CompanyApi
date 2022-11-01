@@ -90,6 +90,26 @@ namespace CompanyApi.Controllers
             return Ok(foundCompany.Employees);
         }
 
+        [HttpPut("{companyID}/employees/{employeeID}")]
+        public ActionResult<List<Employee>> UpdateEmployee(Employee employee, [FromRoute] string companyID, [FromRoute] string employeeID)
+        {
+            var foundCompany = companies.FirstOrDefault(company => company.CompanyID == companyID);
+            if (foundCompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            var foundEmployee = foundCompany.Employees.FirstOrDefault(employee => employee.EmployeeID == employeeID);
+            if (foundEmployee == null)
+            {
+                return new NotFoundResult();
+            }
+
+            foundCompany.Employees.Remove(foundEmployee);
+            foundCompany.Employees.Add(employee);
+            return Ok(foundCompany.Employees);
+        }
+
         [HttpDelete]
         public void DeleteAllCompanies()
         {
