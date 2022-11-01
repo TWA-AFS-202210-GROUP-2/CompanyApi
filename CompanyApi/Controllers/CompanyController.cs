@@ -78,6 +78,18 @@ namespace CompanyApi.Controllers
             return Created($"/companies/{companyID}/employees", employee);
         }
 
+        [HttpGet("{companyID}/employees")]
+        public ActionResult<List<Employee>> GetAllEmployees([FromRoute] string companyID)
+        {
+            var foundCompany = companies.FirstOrDefault(company => company.CompanyID == companyID);
+            if (foundCompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return Ok(foundCompany.Employees);
+        }
+
         [HttpDelete]
         public void DeleteAllCompanies()
         {

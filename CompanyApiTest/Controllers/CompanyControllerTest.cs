@@ -162,6 +162,34 @@ namespace CompanyApiTest.Controllers
             Assert.NotEmpty(createEmployee.EmployeeID);
         }
 
+        [Fact]
+        public async void Should_return_all_employee_of_company_successfully()
+        {
+            // given
+            var httpClient = GetHttpClient();
+            await httpClient.DeleteAsync("/companies");
+            var company = new Company(name: "SLB");
+            var createResponse = await PostCompany(company, httpClient);
+            var createCompany = await DeserializeCompany(createResponse);
+            var employeeOne = new Employee(name: "xiaoming", salary: 2000);
+            var createResponseOne = await PostEmployee(createCompany.CompanyID, employeeOne, httpClient);
+            var createEmployeeOne = await DeserializeEmployee(createResponseOne);
+            var employeeTwo = new Employee(name: "xiaohong", salary: 3000);
+            var createResponseTwo = await PostEmployee(createCompany.CompanyID, employeeTwo, httpClient);
+            var createEmployeeTwo = await DeserializeEmployee(createResponseTwo);
+            var employees = new List<Employee>();
+            employees.Add(createEmployeeOne);
+            employees.Add(createEmployeeTwo);
+
+            // when
+            var response = await httpClient.GetAsync($"/companies/{createCompany.CompanyID}/employees");
+
+            // then
+            var response_ = await response.Content.ReadAsStringAsync();
+            var getEmployees = JsonConvert.DeserializeObject<List<Employee>>(response_);
+            Assert.Equal(employees, getEmployees);
+        }
+
         private static HttpClient GetHttpClient()
         {
             var application = new WebApplicationFactory<Program>();
