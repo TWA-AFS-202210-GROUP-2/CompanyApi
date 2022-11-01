@@ -1,0 +1,27 @@
+AC1:
+POST/parkinglots
+Request Body:
+{
+"capacity": 10
+}
+Response Status Code: 201
+Response Body£º
+{
+"parkingLotID": "XXXXX"
+"capacity": 10
+}
+
+AC2:
+GET/parkinglots
+Response Status Code: 200
+Response Body£º
+{{
+"parkingLotID": "XXXXX1"
+"capacity": 10
+"availablePositionCount": 2
+},
+{
+"parkingLotID": "XXXXX2"
+"capacity": 8
+"availablePositionCount": 4
+}}
