@@ -44,15 +44,23 @@ namespace CompanyApi.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("companies/{_guid}")]
-        public ActionResult<Company> GetById([FromRoute] string _guid)
+        [HttpGet("companies/{id}")]
+        public ActionResult<Company> GetById([FromRoute] string id)
         {
-            return Ok(companies.Find(item => item._guid.Equals(_guid)));
+            return Ok(companies.Find(item => item._guid.Equals(id)));
         }
+
         [HttpPut("companies/{_guid}")]
-        public ActionResult<Company> GetById([FromRoute] string _guid)
+        public ActionResult<Company> Put([FromRoute] string _guid, Company c)
         {
-            return Ok(companies.Find(item => item._guid.Equals(_guid)));
+            companies.Find(item => item._guid.Equals(_guid)).Name = c.Name;
+            return Ok(companies.Find(item => item.Name.Equals(c.Name)));
+        }
+        [HttpPost("companies/{_guid}/employees")]
+        public ActionResult<Company> AddNewEmployee([FromRoute] string _guid, Company c)
+        {
+            companies.Find(item => item._guid.Equals(_guid)).Name = c.Name;
+            return Ok(companies.Find(item => item.Name.Equals(c.Name)));
         }
 
     }

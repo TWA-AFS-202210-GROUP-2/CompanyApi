@@ -12,5 +12,6 @@ public class Company
     }
     public string Name { get; set; }
     public string? _guid { get; set; }
+    
 
 }
