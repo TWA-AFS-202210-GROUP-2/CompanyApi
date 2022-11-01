@@ -63,5 +63,20 @@ namespace CompanyApi.Controllers
             companies.Clear();
             return NoContent();
         }
+
+        [HttpPatch("campnies/{id}")]
+        public ActionResult<Company> UpdateCompany([FromBody] Company newCompany)
+        {
+            if (companies.Exists(item => item.Id == newCompany.Id))
+            {
+                var campany = companies.Find(item => item.Id == newCompany.Id);
+                campany.Name = newCompany.Name;
+                return campany;
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }
