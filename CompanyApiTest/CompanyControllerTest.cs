@@ -229,6 +229,39 @@ namespace CompanyApiTest
             Assert.Equal(responseGetEmployees[0].CompanyId, responseGetEmployees[1].CompanyId);
         }
 
+        [Fact]
+        public async Task Should_update_employee_when_put_given_new_info_successfullyAsync()
+        {
+            // init
+            HttpClient httpClient = await CleanMemory();
+            // given
+            var company = new Company
+            {
+                Name = "AAA",
+            };
+            Company saveCompany = await CreateACompany(httpClient, company);
+            var employee = new Employee
+            {
+                Name = "aaa",
+                Salary = 122,
+            };
+            var employee2 = new Employee
+            {
+                Name = "bbb",
+                Salary = 121,
+            };
+            Employee employeeNew = await CreateEmployee(httpClient, saveCompany, employee);
+            var serializeObject = JsonConvert.SerializeObject(employee2);
+            var putBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+            var responsePut = await httpClient.PutAsync($"/api/companies/{saveCompany.Id}/employees/{employeeNew.Id}", putBody);
+
+            responsePut.EnsureSuccessStatusCode();
+            var responsePutBody = await responsePut.Content.ReadAsStringAsync();
+            var responsePutEmployee = JsonConvert.DeserializeObject<Employee>(responsePutBody);
+
+            Assert.Equal(responsePutEmployee.Name, employee2.Name);
+        }
+
         private static async Task<Employee> CreateEmployee(HttpClient httpClient, Company saveCompany, Employee employee)
         {
             var serializeEmployee = JsonConvert.SerializeObject(employee);
