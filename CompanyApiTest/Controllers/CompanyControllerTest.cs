@@ -81,5 +81,37 @@ namespace CompanyApiTest.Controllers
             var getCompanies = JsonConvert.DeserializeObject<List<Company>>(response_);
             Assert.Equal(createCompany, getCompanies[0]);
         }
+
+        [Fact]
+        public async void Should_return_page_range_companies_successfully()
+        {
+            // given
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var company_one = new Company(name: "SLB");
+            var company_two = new Company(name: "TW");
+            var company_three = new Company(name: "Tencent");
+            await PostCompany(company_one);
+            await PostCompany(company_two);
+            await PostCompany(company_three);
+
+            // when
+            var response = await httpClient.GetAsync("/companies?pageSize=1&pageIndex=2");
+
+            // then
+            var response_ = await response.Content.ReadAsStringAsync();
+            var getCompanies = JsonConvert.DeserializeObject<List<Company>>(response_);
+            Assert.Equal(company_two.Name, getCompanies[0].Name);
+        }
+
+        public async Task PostCompany(Company company)
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync("/companies", postBody);
+        }
     }
 }

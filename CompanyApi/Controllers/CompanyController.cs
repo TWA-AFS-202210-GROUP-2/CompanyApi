@@ -26,8 +26,13 @@ namespace CompanyApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Company>> GetAllCompanies()
+        public ActionResult<List<Company>> GetAllCompanies([FromQuery] int? pageSize, [FromQuery] int? pageIndex)
         {
+            if (pageSize != null && pageIndex != null)
+            {
+                return companies.Skip((pageIndex.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
+            }
+
             return Ok(companies);
         }
 
