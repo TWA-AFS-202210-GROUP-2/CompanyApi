@@ -241,6 +241,27 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(createEmployeeTwo, updateEmployees[0]);
         }
 
+        [Fact]
+        public async void Should_return_404_when_get_all_employees_given_deleted_companyID()
+        {
+            // given
+            var httpClient = GetHttpClient();
+            await httpClient.DeleteAsync("/companies");
+            var company = new Company(name: "SLB");
+            var createResponse = await PostCompany(company, httpClient);
+            var createCompany = await DeserializeCompany(createResponse);
+            var employeeOne = new Employee(name: "xiaoming", salary: 2000);
+            var createResponseOne = await PostEmployee(createCompany.CompanyID, employeeOne, httpClient);
+            var createEmployeeOne = await DeserializeEmployee(createResponseOne);
+
+            // when
+            await httpClient.DeleteAsync($"/companies/{createCompany.CompanyID}");
+            var response = await httpClient.GetAsync($"/companies/{createCompany.CompanyID}/employees");
+
+            // then
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
         private static HttpClient GetHttpClient()
         {
             var application = new WebApplicationFactory<Program>();

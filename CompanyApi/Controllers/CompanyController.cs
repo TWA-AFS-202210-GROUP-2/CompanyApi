@@ -130,6 +130,19 @@ namespace CompanyApi.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{companyID}")]
+        public ActionResult DeleteCompanyByID([FromRoute] string companyID)
+        {
+            var foundCompany = companies.FirstOrDefault(company => company.CompanyID == companyID);
+            if (foundCompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            companies.Remove(foundCompany);
+            return NoContent();
+        }
+
         [HttpDelete]
         public void DeleteAllCompanies()
         {
