@@ -21,5 +21,6 @@ namespace CompanyApiTest.Controllers
             response.EnsureSuccessStatusCode();
             Assert.Equal("Hello World", responseString);
         }
+
     }
 }
