@@ -124,6 +124,101 @@ namespace CompanyApiTest.Controllers
             Assert.Equal("slb", updatedCompany.Name);
         }
 
+        [Fact]
+        public async void Should_return_new_employee_successfully()
+        {
+            //given
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
+
+            var employeeDto = new EmployeeDto { Name = "YaoMeng" };
+            var serializationObject = JsonConvert.SerializeObject(employeeDto);
+            var postBody = new StringContent(serializationObject, encoding: Encoding.UTF8, mediaType: "application/json");
+            //when
+            var response = await httpClient.PostAsync($"/api/companies/{assignedCompany.CompanyID}/employees", postBody);
+            //then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var createdEmployee = JsonConvert.DeserializeObject<Employee>(responseBody);
+            Assert.Equal("YaoMeng", createdEmployee.Name);
+        }
+
+        [Fact]
+        public async void Should_return_employees_of_company_successfully()
+        {
+            //given
+            var httpClient = SetUpHttpClients();
+            var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
+
+            var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
+            var postBodyTwo = new EmployeeDto { Name = "MengYu" };
+            var employeeOne = PostNewEmployee(assignedCompany.CompanyID, postBodyOne);
+            var employeeTwo = PostNewEmployee(assignedCompany.CompanyID, postBodyTwo);
+            //when
+            var response = await httpClient.GetAsync($"/api/companies/{assignedCompany.CompanyID}/employees");
+            //then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var employees = JsonConvert.DeserializeObject<List<Employee>>(responseBody);
+            Assert.Equal("YaoMeng", employees[0].Name);
+        }
+
+        [Fact]
+        public async void Should_return_updated_employee_of_company_successfully()
+        {
+            //given
+            var httpClient = SetUpHttpClients();
+            var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
+
+            var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
+            var postBodyTwo = new EmployeeDto { Name = "MengYu" };
+            var employeeOne = await PostNewEmployee(assignedCompany.CompanyID, postBodyOne);
+            var employeeTwo = await PostNewEmployee(assignedCompany.CompanyID, postBodyTwo);
+            var updatedPostBody = SetupEmployeePostBody(new EmployeeDto { Name = "ZhangSan" });
+            //when
+            var response = await httpClient.PutAsync($"/api/companies/{assignedCompany.CompanyID}/{employeeOne.ID}", updatedPostBody);
+            //then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var employees = JsonConvert.DeserializeObject<List<Employee>>(responseBody);
+            Assert.Equal("ZhangSan", employees[0].Name);
+        }
+
+        [Fact]
+        public async void Should_return_ok_delete_employee_successfully()
+        {
+            //given
+            var httpClient = SetUpHttpClients();
+            var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
+
+            var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
+            var postBodyTwo = new EmployeeDto { Name = "MengYu" };
+            var employeeOne = await PostNewEmployee(assignedCompany.CompanyID, postBodyOne);
+            var employeeTwo = await PostNewEmployee(assignedCompany.CompanyID, postBodyTwo);
+            //when
+            var response = await httpClient.DeleteAsync($"/api/companies/{assignedCompany.CompanyID}/{employeeOne.ID}");
+            //then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_return_ok_delete_company_and_employees_successfully()
+        {
+            //given
+            var httpClient = SetUpHttpClients();
+            var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
+
+            var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
+            var postBodyTwo = new EmployeeDto { Name = "MengYu" };
+            var employeeOne = await PostNewEmployee(assignedCompany.CompanyID, postBodyOne);
+            var employeeTwo = await PostNewEmployee(assignedCompany.CompanyID, postBodyTwo);
+            //when
+            var response = await httpClient.DeleteAsync($"/api/companies/{assignedCompany.CompanyID}");
+            //then
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
         public async Task<Company> PostNewCompany(HttpClient httpClient, CompanyDto company)
         {
             var postBody = SetupPostBody(company);
@@ -131,6 +226,17 @@ namespace CompanyApiTest.Controllers
             var responseBody = await response.Content.ReadAsStringAsync();
             var createdCompany = JsonConvert.DeserializeObject<Company>(responseBody);
             return createdCompany;
+        }
+
+        public async Task<Employee> PostNewEmployee(string companyID, EmployeeDto employeeDto)
+        {
+            var httpClient = SetUpHttpClients();
+            var postBody = SetupEmployeePostBody(employeeDto);
+            var response = await httpClient.PostAsync($"/api/companies/{companyID}/employees", postBody);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var createdEmployee = JsonConvert.DeserializeObject<Employee>(responseBody);
+
+            return createdEmployee;
         }
 
         public HttpClient SetUpHttpClients()
@@ -142,6 +248,14 @@ namespace CompanyApiTest.Controllers
         }
 
         public StringContent SetupPostBody(CompanyDto company)
+        {
+            var serializeObject = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(serializeObject, Encoding.UTF8, mediaType: "application/json");
+
+            return postBody;
+        }
+
+        public StringContent SetupEmployeePostBody(EmployeeDto company)
         {
             var serializeObject = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(serializeObject, Encoding.UTF8, mediaType: "application/json");
