@@ -39,25 +39,23 @@ namespace CompanyApiTest.Controllers
             Assert.NotEmpty(createCompany.CompanyID);
         }
 
-        /*[Fact]
-        public async void Should_get_all_company_list_successfully()
+        [Fact]
+        public async void Should_comflict()
         {
             // given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies/deleteAll");
             var company = new Company(name: "SLB");
             var companyJson = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
 
             // when
+            await httpClient.PostAsync("/companies", postBody);
             var response = await httpClient.PostAsync("/companies", postBody);
 
             // then
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            var createCompany = JsonConvert.DeserializeObject<Company>(responseBody);
-            Assert.Equal("SLB", createCompany.Name);
-            Assert.NotEmpty(createCompany.CompanyID);
-        }*/
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        }
     }
 }
