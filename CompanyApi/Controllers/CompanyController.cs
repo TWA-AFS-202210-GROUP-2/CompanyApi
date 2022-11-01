@@ -10,11 +10,25 @@ namespace CompanyApi.Controllers
     public class CompanyController : ControllerBase
     {
         public static List<Company> companies = new List<Company>();
-        [HttpPost("company")]
-        public Company CreateCompany(Company company)
+
+        [HttpPost("companies")]
+        public ActionResult<Company> CreateCompany(Company company)
         {
             companies.Add(company);
-            return company;
+            return new CreatedResult($"companies/{company.Id}", company);
+        }
+
+        [HttpGet("companies")]
+        public ActionResult<List<Company>> GetCompanies()
+        {
+            return new ObjectResult(companies);
+        }
+
+        [HttpDelete("companies")]
+        public IActionResult DeleteAllCompanies()
+        {
+            companies.Clear();
+            return NoContent();
         }
     }
 }

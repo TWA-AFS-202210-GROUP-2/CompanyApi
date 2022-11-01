@@ -8,7 +8,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-
 namespace CompanyApiTest
 {
     public class CompanyControllerTest
@@ -26,13 +25,56 @@ namespace CompanyApiTest
             var serializeObject = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync("/api/company", postBody);
+            var response = await httpClient.PostAsync("/api/companies", postBody);
 
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
             var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
             Assert.Equal(company.Id, saveCompany.Id);
             Assert.Equal(company.Name, saveCompany.Name);
+        }
+
+        [Fact]
+        public async Task Should_return_NoContent_when_delete_all()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+
+            var response = await httpClient.DeleteAsync("/api/companies");
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        [Fact]
+        public async Task Should_get_all_companyies_successfullyAsync()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            _ = await httpClient.DeleteAsync("/api/companies");
+            var company1 = new Company
+            {
+                Name = "AAA",
+                Id = Guid.NewGuid().ToString(),
+            };
+            var company2 = new Company
+            {
+                Name = "AAB",
+                Id = Guid.NewGuid().ToString(),
+            };
+            var companies = new List<Company>() { company1, company2 };
+            var serializeObject1 = JsonConvert.SerializeObject(company1);
+            var serializeObject2 = JsonConvert.SerializeObject(company2);
+            var postBody1 = new StringContent(serializeObject1, Encoding.UTF8, "application/json");
+            var postBody2 = new StringContent(serializeObject2, Encoding.UTF8, "application/json");
+
+            _ = await httpClient.PostAsync("/api/companies", postBody1);
+            _ = await httpClient.PostAsync("/api/companies", postBody2);
+
+            var response = await httpClient.GetAsync("/api/companies");
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var saveCompanies = JsonConvert.DeserializeObject<List<Company>>(responseBody);
+            Assert.Equal(2, saveCompanies.Union(companies).Count());
         }
     }
 }
