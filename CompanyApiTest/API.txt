@@ -1,1 +1,12 @@
-aa
+AC1:
+POST/companies
+Request Body:
+{
+"carID": "xxxdsagcx"
+}
+Response Status Code: 201
+Response Body£º
+{
+"parkingLotID": "XXXXX"
+"carID": "xxxdsagcx"
+}

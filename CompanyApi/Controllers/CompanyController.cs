@@ -6,12 +6,12 @@ using System.Collections.Generic;
 namespace CompanyApi.Controllers
 {
     [ApiController]
-    [Route("api")]
+    [Route("companies")]
     public class PetController : Controller
     {
         private static List<Company> companies = new List<Company>();
 
-        [HttpPost("addNewCompany")]
+        [HttpPost]
         public ActionResult<Company> AddNewCompany(Company company)
         {
             var exist = companies.Exists(x => x.Name.Equals(company.Name));
@@ -25,22 +25,22 @@ namespace CompanyApi.Controllers
             return new CreatedResult($"/companies/{company.CompanyID}", company);
         }
 
-        [HttpGet("getAllCompanies")]
-        public ActionResult<List<Company>> GetAllPets()
+        [HttpGet]
+        public ActionResult<List<Company>> GetAll()
         {
             return companies;
         }
 
-        [HttpDelete("deleteAllCompanies")]
-        public void DeleteAllPets()
+        [HttpDelete]
+        public void DeleteAll()
         {
             companies.Clear();
         }
 
-        [HttpGet("getByName")]
-        public ActionResult<List<Company>> GetByPrice([FromQuery] string name)
+        [HttpGet("{id}")]
+        public ActionResult<List<Company>> GetCompany(string id)
         {
-            return companies.FindAll(x => x.Name.Equals(name));
+            return companies.FindAll(x => x.CompanyID.Equals(id));
         }
     }
 }

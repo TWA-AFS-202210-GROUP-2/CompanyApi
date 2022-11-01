@@ -1,27 +1,76 @@
 AC1:
-POST/parkinglots
+POST/companies
 Request Body:
 {
-"capacity": 10
+"name": "SLB"
 }
 Response Status Code: 201
 Response Body£º
 {
-"parkingLotID": "XXXXX"
-"capacity": 10
+"CompanyID": "XXXXX",
+"name": "SLB"
 }
 
+POST/companies
+Request Body:
+{
+"name": "SLB"
+}
+Response Status Code: 409
+Response Body£ºnull
+
 AC2:
-GET/parkinglots
+GET/companies/{ID}
+Request Body: null
 Response Status Code: 200
 Response Body£º
-{{
-"parkingLotID": "XXXXX1"
-"capacity": 10
-"availablePositionCount": 2
-},
 {
-"parkingLotID": "XXXXX2"
-"capacity": 8
-"availablePositionCount": 4
-}}
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+GET/companies/{ID}
+Request Body: null
+Response Status Code: 404
+Response Body£ºnull
+
+AC3:
+GET/companies
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+AC4:
+GET/companies
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+AC4:
+GET/companies
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+AC6:
+GET/companies/SLB/employees
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"EmployeeID": "XXXXX",
+"name": "SLB",
+"salary": 1000
+}
