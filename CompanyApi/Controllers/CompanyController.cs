@@ -13,7 +13,7 @@ namespace CompanyApi.Controllers
     public class CompanyController : ControllerBase
     {
         public static List<Company> companies = new List<Company>();
-
+        public static List<Company> employees = new List<Company>();
         [HttpPost("companies")]
         public ActionResult<Company> CreateCompany([FromBody]Company company)
         {
@@ -64,7 +64,7 @@ namespace CompanyApi.Controllers
             return NoContent();
         }
 
-        [HttpPatch("campnies/{id}")]
+        [HttpPatch("companies/{id}")]
         public ActionResult<Company> UpdateCompany([FromBody] Company newCompany)
         {
             if (companies.Exists(item => item.Id == newCompany.Id))

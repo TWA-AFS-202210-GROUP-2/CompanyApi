@@ -139,6 +139,7 @@ namespace CompanyApiTest
             Assert.Equal(1, saveCompanies.Count());
         }
 
+        [Fact]
         public async Task Should_get_updated_company_when_update_give_new_companyies_successfullyAsync()
         {
             // init
@@ -159,7 +160,43 @@ namespace CompanyApiTest
             var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
             saveCompany.Name = "BBB";
             var serializeObjectPatch = JsonConvert.SerializeObject(saveCompany);
-            var patchBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+            var patchBody = new StringContent(serializeObjectPatch, Encoding.UTF8, "application/json");
+            // when
+            var responsePatch = await httpClient.PatchAsync($"/api/companies/{saveCompany.Id}", patchBody);
+            responsePatch.EnsureSuccessStatusCode();
+            var responsePatchBody = await responsePatch.Content.ReadAsStringAsync();
+            var patchedCompany = JsonConvert.DeserializeObject<Company>(responsePatchBody);
+
+            // then
+            var responseGet = await httpClient.GetAsync($"/api/companies/{saveCompany.Id}");
+            responseGet.EnsureSuccessStatusCode();
+            var responseGethBody = await responseGet.Content.ReadAsStringAsync();
+            var responseGetCompany = JsonConvert.DeserializeObject<Company>(responsePatchBody);
+            Assert.Equal(responseGetCompany.Name, "BBB");
+        }
+
+        [Fact]
+        public async Task Should_create_employee_when_create_new_employee_successfullyAsync()
+        {
+            // init
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            _ = await httpClient.DeleteAsync("/api/companies");
+
+            // given
+            var company = new Company
+            {
+                Name = "AAA",
+            };
+            var serializeObject = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("/api/companies", postBody);
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+            saveCompany.Name = "BBB";
+            var serializeObjectPatch = JsonConvert.SerializeObject(saveCompany);
+            var patchBody = new StringContent(serializeObjectPatch, Encoding.UTF8, "application/json");
             // when
             var responsePatch = await httpClient.PatchAsync($"/api/companies/{saveCompany.Id}", patchBody);
             responsePatch.EnsureSuccessStatusCode();
