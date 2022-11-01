@@ -179,34 +179,85 @@ namespace CompanyApiTest
         public async Task Should_create_employee_when_create_new_employee_successfullyAsync()
         {
             // init
-            var application = new WebApplicationFactory<Program>();
-            var httpClient = application.CreateClient();
-            _ = await httpClient.DeleteAsync("/api/companies");
-            _ = await httpClient.DeleteAsync("/api/employees");
+            HttpClient httpClient = await CleanMemory();
             // given
             var company = new Company
             {
                 Name = "AAA",
             };
-            var serializeObject = JsonConvert.SerializeObject(company);
-            var postBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("/api/companies", postBody);
-            response.EnsureSuccessStatusCode();
-            var responseBody = await response.Content.ReadAsStringAsync();
-            var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+            Company saveCompany = await CreateACompany(httpClient, company);
             var employee = new Employee
             {
                 Name = "aaa",
                 Salary = 122,
             };
+            Employee employeeNew = await CreateEmployee(httpClient, saveCompany, employee);
+
+            Assert.Equal(employeeNew.CompanyId, saveCompany.Id);
+        }
+
+        [Fact]
+        public async Task Should_get_employee_when_search_given_company_successfullyAsync()
+        {
+            // init
+            HttpClient httpClient = await CleanMemory();
+            // given
+            var company = new Company
+            {
+                Name = "AAA",
+            };
+            Company saveCompany = await CreateACompany(httpClient, company);
+            var employee = new Employee
+            {
+                Name = "aaa",
+                Salary = 122,
+            };
+            var employee2 = new Employee
+            {
+                Name = "bbb",
+                Salary = 121,
+            };
+            Employee employeeNew = await CreateEmployee(httpClient, saveCompany, employee);
+            Employee employeeNew2 = await CreateEmployee(httpClient, saveCompany, employee2);
+
+            var responseGet = await httpClient.GetAsync($"/api/companies/{saveCompany.Id}/employees");
+
+            responseGet.EnsureSuccessStatusCode();
+            var responseGethBody = await responseGet.Content.ReadAsStringAsync();
+            var responseGetEmployees = JsonConvert.DeserializeObject<List<Employee>>(responseGethBody);
+
+            Assert.Equal(responseGetEmployees[0].CompanyId, responseGetEmployees[1].CompanyId);
+        }
+
+        private static async Task<Employee> CreateEmployee(HttpClient httpClient, Company saveCompany, Employee employee)
+        {
             var serializeEmployee = JsonConvert.SerializeObject(employee);
             var postEmployeeBody = new StringContent(serializeEmployee, Encoding.UTF8, "application/json");
             var responseEmployee = await httpClient.PostAsync($"/api/companies/{saveCompany.Id}/employees", postEmployeeBody);
             responseEmployee.EnsureSuccessStatusCode();
             var responseBodyEmployee = await responseEmployee.Content.ReadAsStringAsync();
             var employeeNew = JsonConvert.DeserializeObject<Employee>(responseBodyEmployee);
+            return employeeNew;
+        }
 
-            Assert.Equal(employeeNew.CompanyId, saveCompany.Id);
+        private static async Task<Company> CreateACompany(HttpClient httpClient, Company company)
+        {
+            var serializeObject = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("/api/companies", postBody);
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var saveCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+            return saveCompany;
+        }
+
+        private static async Task<HttpClient> CleanMemory()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            _ = await httpClient.DeleteAsync("/api/companies");
+            _ = await httpClient.DeleteAsync("/api/employees");
+            return httpClient;
         }
     }
 }

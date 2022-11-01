@@ -114,5 +114,54 @@ namespace CompanyApi.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("companies/{id}/employees")]
+        public ActionResult<List<Employee>> GetEmployeeByCompany([FromRoute] string id)
+        {
+            if (companies.Exists(item => item.Id == id))
+            {
+                if (!employees.Exists(item => item.CompanyId == id))
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    var employeesWithSameCompany = from empl in employees
+                    from comp in companies
+                    where empl.CompanyId == comp.Id
+                    select empl;
+                    return employeesWithSameCompany.ToList();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut("companies/{companyId}/employees/{employeeId}")]
+        public ActionResult<Employee> UpdateEmployeeById([FromRoute] string companyId, 
+            [FromRoute] string employeeId, 
+            [FromBody] Employee employee)
+        {
+            if (companies.Exists(item => item.Id == companyId))
+            {
+                if (!employees.Exists(item => item.Id == employeeId))
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    var newEmployee = employees.Where(item => item.Id == employeeId).First();
+                    newEmployee.Name = employee.Name;
+                    newEmployee.Salary = employee.Salary;
+                    return Ok(newEmployee);
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }
