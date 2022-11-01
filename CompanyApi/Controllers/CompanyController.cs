@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CompanyApi.Controllers
 {
@@ -10,6 +11,7 @@ namespace CompanyApi.Controllers
     public class PetController : Controller
     {
         private static List<Company> companies = new List<Company>();
+        private static List<Employee> employees = new List<Employee>();
 
         [HttpPost]
         public ActionResult<Company> AddNewCompany(Company company)
@@ -25,9 +27,28 @@ namespace CompanyApi.Controllers
             return new CreatedResult($"/companies/{company.CompanyID}", company);
         }
 
-        [HttpGet]
-        public ActionResult<List<Company>> GetAll()
+        [HttpPost("{id}")]
+        public ActionResult<Employee> AddNewEmployee(Employee employee, string id)
         {
+            var exist = employees.Exists(x => x.Name.Equals(employee.Name));
+            if (exist)
+            {
+                return new ConflictResult();
+            }
+
+            employee.CompanyID = Guid.NewGuid().ToString();
+            employees.Add(employee);
+            return new CreatedResult($"/companies/{id}/employees/", employee);
+        }
+
+        [HttpGet]
+        public ActionResult<List<Company>> GetAll([FromQuery]int? pageSize, [FromQuery]int? pageIndex)
+        {
+            if (pageSize == null && pageIndex != null)
+            {
+                return companies.Skip((pageIndex.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
+            }
+            
             return companies;
         }
 
@@ -35,6 +56,13 @@ namespace CompanyApi.Controllers
         public void DeleteAll()
         {
             companies.Clear();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<List<Company>> DeleteCompany(string id)
+        {
+            companies.RemoveAll(x => x.CompanyID.Equals(id));
+            return companies;
         }
 
         [HttpGet("{id}")]
