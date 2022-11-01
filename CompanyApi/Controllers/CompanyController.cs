@@ -64,6 +64,7 @@ namespace CompanyApi.Controllers
             companies.Find(item => item._guid.Equals(_guid)).employees.Add(employee);
             return Ok(employee);
         }
+
         [HttpGet("companies/{_guid}/employees")]
         public ActionResult<List<Employee>> GetEmployees([FromRoute] string _guid)
         {
@@ -73,7 +74,7 @@ namespace CompanyApi.Controllers
         }
 
         [HttpPut("companies/{_guid}/employees")]
-        public ActionResult<Employee> ModifyEmployee([FromRoute] string _guid,Employee employee)
+        public ActionResult<Employee> ModifyEmployee([FromRoute] string _guid, Employee employee)
         {
             Company company = companies.Find(item => item._guid.Equals(_guid));
             var targetEmployee = company.employees.Find(item => item.EmployeeId == employee.EmployeeId);
@@ -81,6 +82,7 @@ namespace CompanyApi.Controllers
             targetEmployee.Salary = employee.Salary;
             return Ok(targetEmployee);
         }
+
         [HttpDelete("companies/{_guid}/employees/{employeeId}")]
         public ActionResult<List<Employee>> DeleteOneEmployee([FromRoute] string _guid, string employeeId)
         {
@@ -89,6 +91,7 @@ namespace CompanyApi.Controllers
             company.employees.Remove(targetEmployee);
             return Ok(company.employees);
         }
+
         [HttpDelete("companies/{_guid}")]
         public ActionResult<List<Employee>> DeleteOneCompany([FromRoute] string _guid)
         {

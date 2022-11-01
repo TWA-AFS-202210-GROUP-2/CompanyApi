@@ -38,39 +38,33 @@ namespace CompanyApiTest.Controllers
             await httpClient.DeleteAsync("/api/companies");
             //when
             var res = await httpClient.PostAsync("/api/companies", stringContent);
-
             //then
             Assert.Equal(HttpStatusCode.Created, res.StatusCode);
             var readAsStringAsync = await res.Content.ReadAsStringAsync();
             var deserializeObject = JsonConvert.DeserializeObject<Company>(readAsStringAsync);
             Assert.Equal(company.Name, deserializeObject.Name);
         }
+
         [Fact]
         public async Task Should_add_new_company_unsuccessful()
         {
             //given
             var httpClient = await HttpClientInit();
             var company = new Company(name: "SLB");
-            company._guid = null;
-            var companyString = JsonConvert.SerializeObject(company);
-            var stringContent = new StringContent(companyString, Encoding.UTF8, "application/json");
-            
-            await httpClient.PostAsync("/api/companies", stringContent);
+            await PostOneCompany(company, httpClient);
             //when
-            var res = await httpClient.PostAsync("/api/companies", stringContent);
-
+            var res = await PostOneCompany(company, httpClient);
             //then
             Assert.Equal(HttpStatusCode.Conflict, res.StatusCode);
         }
+
         [Fact]
         public async Task Should_return_all_companies()
         {
             //given
             var httpClient = await HttpClientInit();
-            var company = new Company(name: "SLB");
-            await PostOneCompany(company, httpClient);
+            await PostOneCompany(new Company(name: "SLB"), httpClient);
             await PostOneCompany(new Company("schlumberger"), httpClient);
-            
             //when
             var res = await httpClient.GetAsync("/api/companies");
 
@@ -80,36 +74,32 @@ namespace CompanyApiTest.Controllers
             var deserializeObject = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
             Assert.Equal(2, deserializeObject.Count);
         }
+
         [Fact]
         public async Task Should_return_selected_company()
         {
             //given
             var httpClient = await HttpClientInit();
             var company = new Company("SLB");
-            var exp = await PostOneCompany(company, httpClient);
-            var expstr = await exp.Content.ReadAsStringAsync();
-            var expobj = JsonConvert.DeserializeObject<Company>(expstr);
+            var expobj = await PostOneCompanyAndGetReturnCompany(company, httpClient);
             //when
             var res = await httpClient.GetAsync($"/api/companies/{expobj._guid}");
-
             //then
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
             var readAsStringAsync = await res.Content.ReadAsStringAsync();
             var deserializeObject = JsonConvert.DeserializeObject<Company>(readAsStringAsync);
             Assert.Equal(company.Name, deserializeObject.Name);
         }
+
         [Fact]
         public async Task Should_return_selected_by_index_and_pagesize_amount_company()
         {
             //given
             var httpClient = await HttpClientInit();
-            
             await PostOneCompany(new Company("1"), httpClient);
             await PostOneCompany(new Company("2"), httpClient);
             await PostOneCompany(new Company("3"), httpClient);
             await PostOneCompany(new Company("4"), httpClient);
-
-
             //when
             var res = await httpClient.GetAsync($"/api/companies?index=2&pagesize=2");
 
@@ -121,6 +111,7 @@ namespace CompanyApiTest.Controllers
             Assert.Equal("3", deserializeObject.First().Name);
             Assert.Equal("4", deserializeObject.Last().Name);
         }
+
         [Fact]
         public async Task Should_modify_company_name()
         {
@@ -138,6 +129,7 @@ namespace CompanyApiTest.Controllers
             var deserializeObject = JsonConvert.DeserializeObject<Company>(readAsStringAsync);
             Assert.Equal(c.Name, deserializeObject.Name);
         }
+
         [Fact]
         public async Task Should_add_a_employee_to_company()
         {
@@ -147,7 +139,8 @@ namespace CompanyApiTest.Controllers
 
             var employee = new Employee("lwr", 1);
             //when
-            var res = await httpClient.PostAsync($"/api/companies/{company._guid}/employees", ConvertObjEmployeeToRequestBody(employee));
+            var res = await httpClient.PostAsync($"/api/companies/{company._guid}/employees",
+                ConvertObjEmployeeToRequestBody(employee));
 
             //then
             Assert.Equal(HttpStatusCode.OK, res.StatusCode);
@@ -155,6 +148,7 @@ namespace CompanyApiTest.Controllers
             var deserializeObject = JsonConvert.DeserializeObject<Employee>(readAsStringAsync);
             Assert.Equal(employee.Name, deserializeObject.Name);
         }
+
         [Fact]
         public async Task Should_return_all_employees_of_a_company()
         {
@@ -182,12 +176,12 @@ namespace CompanyApiTest.Controllers
             await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("wzy", 1));
             lwr.Name = "liwenrui";
             //when
-            var res = await httpClient.PutAsync($"/api/companies/{company._guid}/employees",ConvertObjEmployeeToRequestBody(lwr));
+            var res = await httpClient.PutAsync($"/api/companies/{company._guid}/employees",
+                ConvertObjEmployeeToRequestBody(lwr));
             var readAsStringAsync = await res.Content.ReadAsStringAsync();
             var deserializeObject = JsonConvert.DeserializeObject<Employee>(readAsStringAsync);
             Assert.Equal(lwr.Name, deserializeObject.Name);
         }
-
 
         [Fact]
         public async Task Should_delete_a_employee_of_a_company()
@@ -198,7 +192,7 @@ namespace CompanyApiTest.Controllers
             Employee lwr = await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lwr", 1));
             await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("lj", 1));
             await PostOneEmployeeAndGetReturnEmployee(httpClient, company, new Employee("wzy", 1));
-            
+
             //when
             var res = await httpClient.DeleteAsync($"/api/companies/{company._guid}/employees/{lwr.EmployeeId}");
             var readAsStringAsync = await res.Content.ReadAsStringAsync();
@@ -221,10 +215,11 @@ namespace CompanyApiTest.Controllers
             var res = await httpClient.DeleteAsync($"/api/companies/{company._guid}");
             var readAsStringAsync = await res.Content.ReadAsStringAsync();
             var deserializeObject = JsonConvert.DeserializeObject<List<Company>>(readAsStringAsync);
-            Assert.Equal(1,deserializeObject.Count);
+            Assert.Equal(1, deserializeObject.Count);
         }
 
-        private static async Task<Employee> PostOneEmployeeAndGetReturnEmployee(HttpClient httpClient, Company company, Employee employee)
+        private static async Task<Employee> PostOneEmployeeAndGetReturnEmployee(HttpClient httpClient, Company company,
+            Employee employee)
         {
             var res = await httpClient.PostAsync($"/api/companies/{company._guid}/employees",
                 ConvertObjEmployeeToRequestBody(employee));
@@ -242,6 +237,7 @@ namespace CompanyApiTest.Controllers
             var stringContent = new StringContent(companyString, Encoding.UTF8, "application/json");
             return stringContent;
         }
+
         private static StringContent ConvertObjEmployeeToRequestBody(Employee c)
         {
             var companyString = JsonConvert.SerializeObject(c);
