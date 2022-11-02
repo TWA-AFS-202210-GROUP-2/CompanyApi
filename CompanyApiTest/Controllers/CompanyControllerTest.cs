@@ -240,7 +240,7 @@ public class CompanyController
         var company1 = await AddCompanyAsync("SB", httpClient);
         var employee = await AddEmployeeAsync("Bell", 1000, httpClient, company1);
         var employee2 = await AddEmployeeAsync("Bel", 100, httpClient, company1);
-        var response = await httpClient.DeleteAsync($"companies/{company1.CompanyID}/employees/{employee.EmployeeID}");
+        var response = await httpClient.DeleteAsync($"companies/{company1.CompanyID}/employees/{employee2.EmployeeID}");
         // when
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         // then

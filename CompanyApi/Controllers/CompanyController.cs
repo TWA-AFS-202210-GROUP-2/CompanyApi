@@ -66,9 +66,9 @@ namespace CompanyApi.Controllers
         }
 
         [HttpDelete("{id}/employees/{eid}")]
-        public ActionResult<List<Employee>> DeleteEmployee(string id)
+        public ActionResult<List<Employee>> DeleteEmployee(string eid)
         {
-            employees.RemoveAll(x => x.EmployeeID.Equals(id));
+            employees.RemoveAll(x => x.EmployeeID.Equals(eid));
             return employees;
         }
 
