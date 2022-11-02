@@ -101,7 +101,7 @@ Response Body£º
 }
 
 AC8:
-PUT/companies/{ID}/employees
+PUT/companies/{ID}/employees/{eid}
 Request Body: 
 {
 "EmployeeID": "XXXXX",
@@ -117,7 +117,7 @@ Response Body£º
 }
 
 AC9:
-DELETE/companies/{ID}/employees
+DELETE/companies/{ID}/employees/{eid}
 Request Body: 
 Response Status Code: 200
 Response Body£º
