@@ -1,0 +1,129 @@
+AC1:
+POST/companies
+Request Body:
+{
+"name": "SLB"
+}
+Response Status Code: 201
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+POST/companies
+Request Body:
+{
+"name": "SLB"
+}
+Response Status Code: 409
+Response Body£ºnull
+
+AC2:
+GET/companies
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+
+AC3:
+GET/companies/{ID}
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+GET/companies/{ID}
+Request Body: null
+Response Status Code: 404
+Response Body£ºnull
+
+AC4:
+GET/companies?pageSize=1&pageIndex=1
+Request Body: null
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SLB"
+}
+
+AC5:
+PUT/companies/{id}
+Request Body: 
+{
+"CompanyID": "XXXXX",
+"name": "SL"
+}
+Response Status Code: 200
+Response Body£º
+{
+"CompanyID": "XXXXX",
+"name": "SL"
+}
+
+AC6:
+POST/companies/{ID}/employees
+Request Body: 
+{
+"EmployeeID": "XXXXX",
+"name": "SLB",
+"salary": 1000
+}
+Response Status Code: 201
+Response Body£º
+{
+"EmployeeID": "XXXXX",
+"name": "SLB",
+"salary": 1000
+}
+
+AC7:
+GET/companies/{ID}/employees
+Request Body: 
+{
+"name": "S",
+"salary": 1000
+}
+Response Status Code: 201
+Response Body£º
+{
+"EmployeeID": "XXXXX",
+"name": "S",
+"salary": 1000
+}
+
+AC8:
+PUT/companies/{ID}/employees/{eid}
+Request Body: 
+{
+"EmployeeID": "XXXXX",
+"name": "bb",
+"salary": 100
+}
+Response Status Code: 200
+Response Body£º
+{
+"EmployeeID": "XXXXX",
+"name": "bb",
+"salary": 100
+}
+
+AC9:
+DELETE/companies/{ID}/employees/{eid}
+Request Body: 
+Response Status Code: 200
+Response Body£º
+
+AC10:
+DELETE/companies/{ID}
+Request Body: 
+Response Status Code: 200
+Response Body£º
