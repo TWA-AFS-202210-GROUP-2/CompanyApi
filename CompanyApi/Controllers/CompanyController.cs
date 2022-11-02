@@ -49,12 +49,6 @@ namespace CompanyApi.Controllers
             return employee;
         }
 
-        [HttpGet]
-        public ActionResult<List<Company>> GetAllCompany()
-        {
-            return companies;
-        }
-
         [HttpGet("{companyID}")]
         public ActionResult<Company> GetCompanyByID([FromRoute] string companyID)
         {
@@ -66,7 +60,7 @@ namespace CompanyApi.Controllers
         {
             if (pageSize != null && pageSize != null)
             {
-                return companies.GetRange((pageSize.Value - 1) * pageSize.Value, pageSize.Value);
+                return companies.Skip((pageIndex.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
             }
 
             return companies;

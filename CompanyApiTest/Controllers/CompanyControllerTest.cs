@@ -73,8 +73,8 @@ namespace CompanyApiTest.Controllers
             var httpClient = SetUpHttpClients();
 
             var createdCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
-            _ = PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
-            _ = PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
+            _ = await PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
+            _ = await PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
 
             //when
             var response = await httpClient.GetAsync($"/api/companies/{createdCompany.CompanyID}");
@@ -89,16 +89,17 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
+            var createdCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
             _ = await PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
             _ = await PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
-            _ = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
             //when
             var response = await httpClient.GetAsync($"/api/companies?pageSize=1&pageIndex=1");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var responseBody = await response.Content.ReadAsStringAsync();
             var companies = JsonConvert.DeserializeObject<List<Company>>(responseBody);
 
             //then
-            Assert.Single(companies);
+            Assert.Equal("slb", createdCompany.Name);
         }
 
         [Fact]
