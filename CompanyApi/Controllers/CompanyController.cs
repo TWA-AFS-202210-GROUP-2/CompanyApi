@@ -100,12 +100,12 @@ namespace CompanyApi.Controllers
         }
 
         [HttpPut("{id}/employees/{eid}")]
-        public ActionResult<Employee> PutEmployees(string id, Employee employee)
+        public ActionResult<Employee> PutEmployees(string eid, Employee employee)
         {
-            var employee1 = employees.First(x => x.EmployeeID.Equals(id));
-            employee.Name = employee1.Name;
-            employee.Salary = employee1.Salary;
-            return employee;
+            var employee1 = employees.First(x => x.EmployeeID.Equals(eid));
+            employee1.Name = employee.Name;
+            employee1.Salary = employee.Salary;
+            return employee1;
         }
     }
 }
