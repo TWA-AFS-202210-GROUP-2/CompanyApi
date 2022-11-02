@@ -89,8 +89,9 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
-            _ = PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
-            _ = PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
+            _ = await PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
+            _ = await PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
+            _ = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
             //when
             var response = await httpClient.GetAsync($"/api/companies?pageSize=1&pageIndex=1");
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -181,8 +182,8 @@ namespace CompanyApiTest.Controllers
             //then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var responseBody = await response.Content.ReadAsStringAsync();
-            var employees = JsonConvert.DeserializeObject<List<Employee>>(responseBody);
-            Assert.Equal("ZhangSan", employees[0].Name);
+            var employees = JsonConvert.DeserializeObject<Employee>(responseBody);
+            Assert.Equal("ZhangSan", employees.Name);
         }
 
         [Fact]

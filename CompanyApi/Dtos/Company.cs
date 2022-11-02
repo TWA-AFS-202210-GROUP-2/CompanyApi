@@ -7,6 +7,10 @@ namespace CompanyApi.Dtos
     public class Company
     {
         private static List<Employee> employees = new List<Employee>();
+        public Company()
+        {
+            Employees = employees;
+        }
 
         public string? CompanyID { get; init; }
         public string? Name { get; set; }
