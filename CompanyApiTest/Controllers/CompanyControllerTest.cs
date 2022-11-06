@@ -21,6 +21,7 @@ namespace CompanyApiTest.Controllers
             // given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/api/companies");
             var company = new CompanyDto { Name = "slb" };
             var companyJson = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
@@ -44,6 +45,7 @@ namespace CompanyApiTest.Controllers
             var httpClient = SetUpHttpClients();
             var company = new CompanyDto { Name = "slb" };
             var postBody = SetupPostBody(company);
+            await httpClient.DeleteAsync("/api/companies");
 
             // when
             var response = await httpClient.PostAsync("/api/companies", postBody);
@@ -57,7 +59,7 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
-
+            await httpClient.DeleteAsync("/api/companies");
             PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
             PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
             // when
@@ -71,7 +73,7 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
-
+            await httpClient.DeleteAsync("/api/companies");
             var createdCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
             _ = await PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
             _ = await PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
@@ -89,6 +91,7 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
+            await httpClient.DeleteAsync("/api/companies");
             var createdCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
             _ = await PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
             _ = await PostNewCompany(httpClient, new CompanyDto { Name = "ThoughtWorks" });
@@ -108,6 +111,7 @@ namespace CompanyApiTest.Controllers
             //given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/api/companies");
             var company = new CompanyDto { Name = "Schlumberger" };
             var sericalizationObject = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(sericalizationObject, Encoding.UTF8, mediaType: "application/json");
@@ -132,6 +136,7 @@ namespace CompanyApiTest.Controllers
             //given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/api/companies");
             var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
 
             var employeeDto = new EmployeeDto { Name = "YaoMeng" };
@@ -151,19 +156,20 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
+            await httpClient.DeleteAsync("/api/companies");
             var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
 
             var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
             var postBodyTwo = new EmployeeDto { Name = "MengYu" };
-            var employeeOne = PostNewEmployee(assignedCompany.CompanyID, postBodyOne);
-            var employeeTwo = PostNewEmployee(assignedCompany.CompanyID, postBodyTwo);
+            var employeeOne = await PostNewEmployee(assignedCompany.CompanyID, postBodyOne);
+            var employeeTwo = await PostNewEmployee(assignedCompany.CompanyID, postBodyTwo);
             //when
             var response = await httpClient.GetAsync($"/api/companies/{assignedCompany.CompanyID}/employees");
             //then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var responseBody = await response.Content.ReadAsStringAsync();
             var employees = JsonConvert.DeserializeObject<List<Employee>>(responseBody);
-            Assert.Equal("YaoMeng", employees[0].Name);
+            Assert.Equal(2, employees.Count());
         }
 
         [Fact]
@@ -171,6 +177,7 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
+            await httpClient.DeleteAsync("/api/companies");
             var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
 
             var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
@@ -192,6 +199,7 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
+            await httpClient.DeleteAsync("/api/companies");
             var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
 
             var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
@@ -209,6 +217,7 @@ namespace CompanyApiTest.Controllers
         {
             //given
             var httpClient = SetUpHttpClients();
+            await httpClient.DeleteAsync("/api/companies");
             var assignedCompany = await PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
 
             var postBodyOne = new EmployeeDto { Name = "YaoMeng" };
