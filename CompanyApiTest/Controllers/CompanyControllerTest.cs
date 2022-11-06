@@ -58,8 +58,8 @@ namespace CompanyApiTest.Controllers
             //given
             var httpClient = SetUpHttpClients();
 
-            _ = PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
-            _ = PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
+            PostNewCompany(httpClient, new CompanyDto { Name = "slb" });
+            PostNewCompany(httpClient, new CompanyDto { Name = "Schlumberger" });
             // when
             var response = await httpClient.GetAsync("/api/companies");
             // then
